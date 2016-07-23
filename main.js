@@ -1,11 +1,11 @@
-angular.module('dash.controllers', ['firebase', 'ngRoute'])
+angular.module('dash', ['firebase', 'ngRoute'])
     .service('$db', function ($firebaseObject, $firebaseArray) {
 
         var base = 'https://MY-FIREBASE-URL.firebaseio.com/';
 
-        function db(name=[]) {
+        function struct($name=[]) {
             return {
-                name,
+                $path,
                 onAuth(...args) {
                     return this.get().onAuth(...args);
                 },
@@ -13,10 +13,13 @@ angular.module('dash.controllers', ['firebase', 'ngRoute'])
                     return this.get().authWithPassword(...args);
                 },
                 get() {
-                    return new Firebase(base + name.join('/'));
+                    return $firebaseObject(this.ref());
                 },
                 all() {
                     return $firebaseArray(this.get());
+                },
+                ref() {
+                    return new Firebase(base + $path.join('/'));
                 }
             }
         }
@@ -25,15 +28,15 @@ angular.module('dash.controllers', ['firebase', 'ngRoute'])
             get(target, property) {
                 return property in target
                     ? target[property]
-                    : new Proxy(db(target.name.slice().concat([property])), proxy);
+                    : new Proxy(struct(target.$path.concat([property])), proxy);
             }
         };
 
-        return new Proxy(db(), proxy);
+        return new Proxy(struct(), proxy);
     })
     .service('$auth', function ($db, $location) {
         return new Promise((resolve, reject) => {
-            // listening user authentication state
+            // listen user auth state
             $db.onAuth(authData => {
                 if (authData) {
                     resolve();
@@ -46,8 +49,10 @@ angular.module('dash.controllers', ['firebase', 'ngRoute'])
     })
     .controller('main', function ($scope, $db) {
 
-        // getting node values
-        $scope.customers = $db.users.customer.all();
+        // getting node values from Firebase
+
+        $scope.data = $db.any.path.from.database.all();
+
 
     })
     .controller('dash', function () {
