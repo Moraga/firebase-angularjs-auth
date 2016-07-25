@@ -3,7 +3,7 @@ angular.module('dash', ['firebase', 'ngRoute'])
 
         var base = 'https://MY-FIREBASE-URL.firebaseio.com/';
 
-        function struct($name=[]) {
+        function struct($path=[]) {
             return {
                 $path,
                 onAuth(...args) {
@@ -92,4 +92,7 @@ angular.module('dash', ['firebase', 'ngRoute'])
             .otherwise({
                 redirect: '/'
             });
+
+        // create base tag to enable urls without hash
+        // $locationProvider.html5Mode(true);
     });
